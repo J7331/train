@@ -18,7 +18,20 @@ struct TrainActivityAttributes: ActivityAttributes {
     var name: String
 }
 
-let trainGroup = "group.com.j7331.train"
+// The shared container the app and its widgets both read. Sideloading tools often rename the
+// app group, so use whichever group this copy was actually signed with.
+let trainGroup: String = {
+    let fallback = "group.com.j7331.train"
+    guard let url = Bundle.main.url(forResource: "embedded", withExtension: "mobileprovision"),
+          let data = try? Data(contentsOf: url),
+          let a = data.range(of: Data("<?xml".utf8)),
+          let b = data.range(of: Data("</plist>".utf8), in: a.lowerBound..<data.endIndex),
+          let plist = try? PropertyListSerialization.propertyList(from: data.subdata(in: a.lowerBound..<b.upperBound), format: nil) as? [String: Any],
+          let ent = plist["Entitlements"] as? [String: Any],
+          let groups = ent["com.apple.security.application-groups"] as? [String], !groups.isEmpty
+    else { return fallback }
+    return groups.first(where: { $0.lowercased().contains("train") }) ?? groups[0]
+}()
 
 struct WidgetSummary: Codable {
     var goal: Int = 4
