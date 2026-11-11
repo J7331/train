@@ -25,6 +25,8 @@ jobs:
             -destination 'generic/platform=iOS' -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build | tail -40
           test -d build/Build/Products/Release-iphoneos/App.app
+          test -d build/Build/Products/Release-iphoneos/App.app/PlugIns/TrainLive.appex
+          test -f build/Build/Products/Release-iphoneos/App.app/rest.wav
       - run: |
           mkdir -p Payload
           cp -R build/Build/Products/Release-iphoneos/App.app Payload/
