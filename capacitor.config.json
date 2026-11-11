@@ -1,0 +1,10 @@
+{
+  "appId": "com.j7331.train",
+  "appName": "Train",
+  "webDir": "www",
+  "backgroundColor": "#0D0F12",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#0D0F12"
+  }
+}
