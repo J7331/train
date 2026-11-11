@@ -145,13 +145,22 @@ struct TrainLiveActivity: Widget {
                 Group {
                     if resting { RestTimer(st: st) } else { WorkoutClock(st: st) }
                 }
+                .font(.system(size: 15, weight: .semibold))
                 .monospacedDigit()
                 .foregroundStyle(resting ? accent : .white)
                 .multilineTextAlignment(.trailing)
-                .frame(maxWidth: 52)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .frame(width: 58, alignment: .trailing)
             } minimal: {
                 if resting {
-                    RestTimer(st: st).monospacedDigit().foregroundStyle(accent).frame(maxWidth: 40)
+                    // a countdown ring: the time itself doesn't fit in this small circle
+                    ZStack {
+                        ProgressView(timerInterval: st.restRange, countsDown: true) { EmptyView() } currentValueLabel: { EmptyView() }
+                            .progressViewStyle(.circular)
+                            .tint(accent)
+                        Image(systemName: "timer").font(.system(size: 10, weight: .bold)).foregroundStyle(accent)
+                    }
                 } else {
                     Image(systemName: "dumbbell.fill").foregroundStyle(accent)
                 }
