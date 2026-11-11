@@ -5,6 +5,17 @@
   "backgroundColor": "#0D0F12",
   "ios": {
     "contentInset": "never",
-    "backgroundColor": "#0D0F12"
+    "backgroundColor": "#0D0F12",
+    "allowsLinkPreview": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false,
+      "backgroundColor": "#0D0F12",
+      "showSpinner": false
+    },
+    "Keyboard": {
+      "resize": "none"
+    }
   }
 }

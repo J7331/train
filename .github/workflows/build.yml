@@ -18,6 +18,9 @@ jobs:
           sed -i '' "s#__REMOTE__#https://$OWNER.github.io/${GITHUB_REPOSITORY#*/}/#" www/index.html
       - run: npx cap sync ios
       - run: |
+          gem list -i xcodeproj >/dev/null || sudo gem install xcodeproj --no-document
+          ruby ios/live.rb
+      - run: |
           xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -sdk iphoneos \
             -destination 'generic/platform=iOS' -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build | tail -40
