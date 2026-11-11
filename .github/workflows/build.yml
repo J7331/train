@@ -28,6 +28,13 @@ jobs:
           test -d build/Build/Products/Release-iphoneos/App.app/PlugIns/TrainLive.appex
           test -f build/Build/Products/Release-iphoneos/App.app/rest.wav
       - run: |
+          APP=build/Build/Products/Release-iphoneos/App.app
+          find "$APP" -path "*/Frameworks/*" \( -name "*.framework" -o -name "*.dylib" \) -maxdepth 3 -print0 | xargs -0 -I{} codesign -f -s - {}
+          codesign -f -s - --entitlements ios/App/TrainLive/TrainLive.entitlements "$APP/PlugIns/TrainLive.appex"
+          codesign -f -s - --entitlements ios/App/App/App.entitlements "$APP"
+          codesign -d --entitlements - "$APP" 2>/dev/null | grep -q group.com.j7331.train
+          codesign -d --entitlements - "$APP/PlugIns/TrainLive.appex" 2>/dev/null | grep -q group.com.j7331.train
+      - run: |
           mkdir -p Payload
           cp -R build/Build/Products/Release-iphoneos/App.app Payload/
           zip -qry Train.ipa Payload

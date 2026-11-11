@@ -15,8 +15,11 @@ app.add_resources([app_group.new_reference('rest.wav')])
 
 ext = proj.new_target(:app_extension, 'TrainLive', :ios, '16.2', nil, :swift)
 grp = proj.main_group.new_group('TrainLive', 'TrainLive')
-ext.add_file_references(%w[TrainLiveBundle.swift TrainLiveActivity.swift].map { |f| grp.new_reference(f) })
+ext.add_file_references(%w[TrainLiveBundle.swift TrainLiveActivity.swift TrainHomeWidget.swift].map { |f| grp.new_reference(f) })
 grp.new_reference('Info.plist')
+grp.new_reference('TrainLive.entitlements')
+app_group.new_reference('App.entitlements')
+app.build_configurations.each { |c| c.build_settings['CODE_SIGN_ENTITLEMENTS'] = 'App/App.entitlements' }
 ext.add_file_references([refs.last])
 %w[WidgetKit SwiftUI ActivityKit].each { |fw| ext.add_system_framework(fw) }
 
@@ -35,6 +38,7 @@ ext.build_configurations.each do |c|
   s['APPLICATION_EXTENSION_API_ONLY'] = 'YES'
   s['LD_RUNPATH_SEARCH_PATHS'] = ['$(inherited)', '@executable_path/Frameworks', '@executable_path/../../Frameworks']
   s['CODE_SIGN_STYLE'] = 'Automatic'
+  s['CODE_SIGN_ENTITLEMENTS'] = 'TrainLive/TrainLive.entitlements'
 end
 
 embed = app.new_copy_files_build_phase('Embed Foundation Extensions')

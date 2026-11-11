@@ -1,6 +1,7 @@
 import Foundation
 import Capacitor
 import ActivityKit
+import WidgetKit
 
 @objc(TrainNativePlugin)
 public class TrainNativePlugin: CAPPlugin, CAPBridgedPlugin {
@@ -8,7 +9,8 @@ public class TrainNativePlugin: CAPPlugin, CAPBridgedPlugin {
     public let jsName = "TrainNative"
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "liveUpdate", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "liveEnd", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "liveEnd", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "widgetUpdate", returnType: CAPPluginReturnPromise)
     ]
 
     private func date(_ call: CAPPluginCall, _ key: String) -> Date? {
@@ -50,5 +52,13 @@ public class TrainNativePlugin: CAPPlugin, CAPBridgedPlugin {
             }
             call.resolve()
         }
+    }
+
+    @objc func widgetUpdate(_ call: CAPPluginCall) {
+        if let json = call.getString("json") {
+            UserDefaults(suiteName: trainGroup)?.set(json, forKey: "summary")
+            WidgetCenter.shared.reloadAllTimelines()
+        }
+        call.resolve()
     }
 }
