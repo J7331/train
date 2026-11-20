@@ -111,7 +111,7 @@ private struct UpNext: View {
                 Text(s.next).font(.system(size: 20, weight: .semibold)).foregroundStyle(ink).lineLimit(1).minimumScaleFactor(0.7)
                 Text(s.nextDetail).font(.system(size: 12)).foregroundStyle(soft).lineLimit(1).minimumScaleFactor(0.8)
             } else {
-                Text("Train").font(.system(size: 20, weight: .semibold)).foregroundStyle(ink)
+                Text("Lift").font(.system(size: 20, weight: .semibold)).foregroundStyle(ink)
             }
         }
     }
@@ -174,7 +174,7 @@ struct TrainHomeWidget: Widget {
         StaticConfiguration(kind: "TrainHome", provider: TrainProvider()) { entry in
             TrainHomeView(entry: entry)
         }
-        .configurationDisplayName("Train")
+        .configurationDisplayName("Lift")
         .description("Your week, what’s next, and your last workout.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
