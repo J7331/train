@@ -1,0 +1,74 @@
+name: testflight
+on:
+  workflow_dispatch:
+
+# Signed build for TestFlight. Uses its own IDs (com.j7331.lift) so it can live next to the
+# sideloaded copy. Needs repo secrets: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8, APPLE_TEAM_ID.
+jobs:
+  testflight:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    env:
+      BID: com.j7331.lift
+      GRP: group.com.j7331.lift
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Point the shell at the live site
+        run: |
+          OWNER=$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')
+          sed -i '' "s#__REMOTE__#https://$OWNER.github.io/${GITHUB_REPOSITORY#*/}/#" www/index.html
+      - name: Use the TestFlight IDs
+        run: |
+          sed -i '' "s/group\.com\.j7331\.train/$GRP/g" ios/App/App/App.entitlements ios/App/TrainLive/TrainLive.entitlements ios/App/App/TrainActivityAttributes.swift
+          sed -i '' "s/com\.j7331\.train\.TrainLive/$BID.TrainLive/" ios/live.rb
+          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = com\.j7331\.train;/PRODUCT_BUNDLE_IDENTIFIER = $BID;/" ios/App/App.xcodeproj/project.pbxproj
+          sed -i '' "s/\"appId\": \"com\.j7331\.train\"/\"appId\": \"$BID\"/" capacitor.config.json
+      - run: npx cap sync ios
+      - run: |
+          gem list -i xcodeproj >/dev/null || sudo gem install xcodeproj --no-document
+          ruby ios/live.rb
+      - name: API key
+        env:
+          P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          printf '%s\n' "$P8" > "$RUNNER_TEMP/key.p8"
+          test -s "$RUNNER_TEMP/key.p8"
+      - name: Archive
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/key.p8" \
+            -authenticationKeyID "${{ secrets.ASC_KEY_ID }}" \
+            -authenticationKeyIssuerID "${{ secrets.ASC_ISSUER_ID }}" \
+            DEVELOPMENT_TEAM="${{ secrets.APPLE_TEAM_ID }}" CODE_SIGN_STYLE=Automatic \
+            CURRENT_PROJECT_VERSION="$((100 + GITHUB_RUN_NUMBER))" \
+            archive | tail -60
+          test -d "$RUNNER_TEMP/App.xcarchive"
+      - name: Upload to TestFlight
+        run: |
+          cat > "$RUNNER_TEMP/export.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>${{ secrets.APPLE_TEAM_ID }}</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict></plist>
+          EOF
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/export.plist" -exportPath "$RUNNER_TEMP/out" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/key.p8" \
+            -authenticationKeyID "${{ secrets.ASC_KEY_ID }}" \
+            -authenticationKeyIssuerID "${{ secrets.ASC_ISSUER_ID }}" | tail -40
+      - if: always()
+        run: rm -f "$RUNNER_TEMP/key.p8"
