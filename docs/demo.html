@@ -13,7 +13,7 @@
 html,body{margin:0;height:100%;background:#000;color:var(--fg);font-family:-apple-system,system-ui,sans-serif;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
 /* mode switch */
 #mode{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:99999;display:flex;background:rgba(40,44,52,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:12px;padding:3px;gap:2px;box-shadow:0 6px 24px rgba(0,0,0,.5)}
-#mode button{all:unset;padding:9px 14px;border-radius:9px;font:600 14px -apple-system,system-ui;color:#C9CED8;cursor:pointer}
+#mode button{all:unset;white-space:nowrap;padding:9px 11px;border-radius:9px;font:600 14px -apple-system,system-ui;color:#C9CED8;cursor:pointer}
 #mode button.on{background:#5C6070;color:#fff}
 .view{position:fixed;inset:0;display:none}
 .view.on{display:block}
@@ -58,7 +58,7 @@ html,body{margin:0;height:100%;background:#000;color:var(--fg);font-family:-appl
 </style>
 </head>
 <body>
-<div id="mode"><button data-m="ionic" class="on">Ionic</button><button data-m="lift">Lift + gestures</button></div>
+<div id="mode"><button data-m="ionic" class="on">Ionic</button><a href="demo-f7.html" style="all:unset;white-space:nowrap;padding:9px 11px;border-radius:9px;font:600 14px -apple-system,system-ui;color:#C9CED8;cursor:pointer">Framework7</a><button data-m="lift">Lift + gestures</button></div>
 
 <!-- ================= A: real Ionic components (iOS mode) ================= -->
 <div class="view on" id="ionic"><ion-app><ion-nav id="nav" root="ion-home" swipe-gesture="true"></ion-nav></ion-app></div>
@@ -95,6 +95,7 @@ document.querySelectorAll('#mode button').forEach(b => b.onclick = () => {
   document.querySelectorAll('#mode button').forEach(x => x.classList.toggle('on', x === b));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === b.dataset.m));
 });
+if (location.hash === '#lift') document.querySelector('#mode button[data-m=lift]').click();
 
 /* ---------- A: Ionic pages ---------- */
 const row = (n, sub, link) => `<ion-item ${link ? 'button detail="true"' : ''} class="go"><ion-label><h2>${n}</h2><p>${sub}</p></ion-label></ion-item>`;

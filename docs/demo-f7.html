@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Lift feel demo · Framework7</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/framework7@8.3.4/framework7-bundle.min.css">
+<style>
+html,body{background:#000}
+#mode{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:99999;display:flex;background:rgba(40,44,52,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:12px;padding:3px;gap:2px;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+#mode{transition:opacity .2s}#mode.hide{opacity:0;pointer-events:none}
+#mode a{white-space:nowrap;padding:9px 11px;border-radius:9px;font:600 14px -apple-system,system-ui;color:#C9CED8;text-decoration:none}
+#mode a.on{background:#5C6070;color:#fff}
+.button{text-transform:none!important}
+.hint{color:#8E8E93;font-size:13px;text-align:center;padding:4px 24px 140px}
+.set{font-weight:600;font-size:20px;font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 16px}
+.grid div{height:52px;border-radius:10px;background:#2C2C2E;display:grid;place-items:center;font:600 20px -apple-system,system-ui;color:#fff}
+.grid div.on{background:#0A84FF}
+</style>
+</head>
+<body>
+<div id="mode"><a href="demo.html">Ionic</a><a class="on" href="demo-f7.html">Framework7</a><a href="demo.html#lift">Lift + gestures</a></div>
+<div id="app">
+  <div class="view view-main view-init safe-areas" data-url="/">
+    <div class="page" data-name="home">
+      <div class="navbar navbar-large navbar-transparent"><div class="navbar-bg"></div><div class="navbar-inner">
+        <div class="title">Lift</div><div class="right"><span style="color:#8E8E93;font-size:15px;padding-right:12px">1 of 4</span></div>
+        <div class="title-large"><div class="title-large-text">Lift</div></div></div></div>
+      <div class="page-content ptr-content" data-ptr-distance="60">
+        <div class="ptr-preloader"><div class="preloader"></div><div class="ptr-arrow"></div></div>
+        <div class="block-title">Up next</div>
+        <div class="list list-strong inset list-dividers"><ul>
+          <li><a href="/detail/" class="item-link item-content"><div class="item-inner"><div class="item-title">Lower H<div class="item-footer">5 exercises · 13 sets</div></div></div></a></li>
+        </ul></div>
+        <div class="block-title">Recent</div>
+        <div class="list list-strong inset list-dividers media-list"><ul>
+          <li class="swipeout"><div class="swipeout-content"><a href="/detail/" class="item-link item-content"><div class="item-inner"><div class="item-title-row"><div class="item-title">Lower S</div></div><div class="item-subtitle">Sun, Nov 22 · 1:07 – 4:12 AM</div></div></a></div>
+            <div class="swipeout-actions-right"><a class="swipeout-delete">Delete</a></div></li>
+          <li class="swipeout"><div class="swipeout-content"><a href="/detail/" class="item-link item-content"><div class="item-inner"><div class="item-title-row"><div class="item-title">Upper H</div></div><div class="item-subtitle">Mon, Nov 23 · 1:27 – 2:51 AM</div></div></a></div>
+            <div class="swipeout-actions-right"><a class="swipeout-delete">Delete</a></div></li>
+          <li class="swipeout"><div class="swipeout-content"><a href="/detail/" class="item-link item-content"><div class="item-inner"><div class="item-title-row"><div class="item-title">Abs</div></div><div class="item-subtitle">Mon, Nov 23 · 5:13 AM</div></div></a></div>
+            <div class="swipeout-actions-right"><a class="swipeout-delete">Delete</a></div></li>
+        </ul></div>
+        <p class="hint">Tap a row, then swipe from the left edge to go back. Swipe a Recent row left to delete it. Pull down to refresh. Scroll to see the big title shrink.</p>
+      </div>
+    </div>
+  </div>
+  <div class="sheet-modal pick" style="height:auto">
+    <div class="swipe-handler"></div>
+    <div class="sheet-modal-inner"><div class="page-content" style="padding:24px 0 30px">
+      <div class="block-title block-title-medium" style="margin-top:0">Set 2 · Squat</div>
+      <div class="grid">${''}</div>
+      <p class="hint" style="padding-bottom:10px">Drag it down to close.</p>
+    </div></div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/framework7@8.3.4/framework7-bundle.min.js"></script>
+<script>
+document.querySelector('.pick .grid').innerHTML = [6,7,8,9,10,11,12,13,14,15,16,17].map(n => `<div class="${n === 8 ? 'on' : ''}">${n}</div>`).join('');
+const ex = (n, w, r) => `<li><div class="item-content"><div class="item-inner"><div class="item-title-row"><div class="item-title">${n}</div></div><div class="item-subtitle set">${w} lb × ${r}</div></div></div></li>`;
+const detail = `<div class="page" data-name="detail">
+  <div class="navbar"><div class="navbar-bg"></div><div class="navbar-inner sliding">
+    <div class="left"><a href="#" class="link back"><i class="icon icon-back"></i><span class="if-not-md">Lift</span></a></div>
+    <div class="title">Lower S</div><div class="right"><a href="#" class="link more">•••</a></div></div></div>
+  <div class="page-content">
+    <div class="list list-strong inset list-dividers"><ul>
+      <li class="item-content"><div class="item-inner"><div class="item-title">Time</div><div class="item-after">3h 05m</div></div></li>
+      <li class="item-content"><div class="item-inner"><div class="item-title">Volume</div><div class="item-after">19,605 lb</div></div></li>
+      <li class="item-content"><div class="item-inner"><div class="item-title">Sets</div><div class="item-after">11</div></div></li></ul></div>
+    <div class="list list-strong inset list-dividers media-list"><ul>${ex('Squat (Barbell)', 210, '8 · 8 · 8')}${ex('Romanian Deadlift (Barbell)', 195, '8 · 8 · 8')}${ex('Hack Squat (Machine)', 180, '10 · 9 · 8')}</ul></div>
+    <div class="block"><a href="#" class="button button-large button-fill sheet-open" data-sheet=".pick">Open set picker</a></div>
+    <p class="hint">Swipe from the left edge to go back. Try ••• for the action sheet.</p>
+  </div></div>`;
+const app = new Framework7({
+  el: '#app', theme: 'ios', darkMode: true,
+  view: { iosSwipeBack: true },
+  sheet: { swipeToClose: true, backdrop: true, closeByBackdropClick: true },
+  routes: [{ path: '/detail/', content: detail }],
+});
+app.on('modalOpen', () => document.getElementById('mode').classList.add('hide')); app.on('modalClosed', () => document.getElementById('mode').classList.remove('hide'));
+app.ptr.get('.ptr-content') && app.on('ptrRefresh', el => setTimeout(() => app.ptr.done(el), 900));
+document.addEventListener('click', e => {
+  if (!e.target.closest('.more')) return; e.preventDefault();
+  app.actions.create({ buttons: [[{text:'Lower S', label:true}, {text:'Edit workout'}, {text:'Save as routine'}, {text:'Do again'}, {text:'Delete workout', color:'red'}], [{text:'Cancel', bold:true}]] }).open();
+});
+</script>
+</body>
+</html>
