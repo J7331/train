@@ -28,6 +28,8 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Lift uses the camera to count your reps in hands-free mode. Video stays on your iPhone and is never saved.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
