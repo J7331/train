@@ -1401,7 +1401,7 @@ function seedRoutines(){
 /* ---------- storage: this device + your private Claude storage ---------- */
 const LS = window.LIFT_LS || 'liftbook.v1';
 /* ---------- iPhone app: extras that only switch on inside the Train app (Capacitor) ---------- */
-const BUILD0 = '1795747684870', BUILD = BUILD0.startsWith('__') ? 'dev' : BUILD0;
+const BUILD0 = '1795803710767', BUILD = BUILD0.startsWith('__') ? 'dev' : BUILD0;
 const NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 const NP = n => NATIVE ? ((window.Capacitor.Plugins || {})[n] || null) : null;
 const DATA_FILE = 'train-data.json'; // Files › On My iPhone › Train, read back by the app shell at launch
@@ -2032,7 +2032,7 @@ function exCard(W, e, ei, L, inner, now){
   }
   const load = big || pic ? `<div class="exc-w">${big}${big ? upRow : ''}${pic ? `<span class="pmini" id="ps-${ei}">${pic}</span>` : ''}</div>` : '';
   const upC = big ? '' : upRow, su0 = setupHTML(e, ei), chips = rest || upC || su0 ? `<div class="exc-c">${rest}${upC}${su0}</div>` : '';
-  let c = '', divided = false, wn = -1; const nxt = nextSet(W), pvw = (pv || []).filter(z => z.t !== 'w');
+  let c = '', divided = false, wn = -1; const nxt = nextSet(W, true), pvw = (pv || []).filter(z => z.t !== 'w');
   e.sets.forEach((st, si) => {
     const warm = st.t === 'w', attrs = `data-ei="${ei}" data-si="${si}"`;
     // versus the same set last session: reps up/down as a +N / −N badge on the circle, weight up/down as ↑ / ↓ on the label
