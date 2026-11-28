@@ -1426,7 +1426,7 @@ function seedRoutines(){
 /* ---------- storage: this device + your private Claude storage ---------- */
 const LS = window.LIFT_LS || 'liftbook.v1';
 /* ---------- iPhone app: extras that only switch on inside the Train app (Capacitor) ---------- */
-const BUILD0 = '1795845556091', BUILD = BUILD0.startsWith('__') ? 'dev' : BUILD0;
+const BUILD0 = '1795847949447', BUILD = BUILD0.startsWith('__') ? 'dev' : BUILD0;
 const NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 const NP = n => NATIVE ? ((window.Capacitor.Plugins || {})[n] || null) : null;
 const DATA_FILE = 'train-data.json'; // Files › On My iPhone › Train, read back by the app shell at launch
@@ -3525,16 +3525,18 @@ function hfPose(now, lm){
   const ev = HF.rc.push(now, lm || null); if (!ev) return;
   if (ev.type === 'end') $('#hf').dataset.end = `${ev.reps} ${ev.why}`;   // why the last set ended, for troubleshooting
   const nx = hfNext(); if (!nx || nx.k === 'dur') { HF.early = false; return; }
-  if (ev.type === 'start') { if (UI.rest) HF.early = true; else { HF.reps = ev.reps; hfSound('start'); hfPhase('count'); } }
+  // Getting into a machine (sitting down, grabbing the handle, leaning back and forth) can look like a few reps.
+  // So the count only appears at the 3rd rep, and a "set" shorter than 40% of the target (at least 3) is let go, not logged.
+  const showAt = nx.target && nx.target <= 4 ? 2 : 3, logAt = nx.target ? Math.max(Math.min(3, nx.target), Math.ceil(nx.target * 0.4)) : 3;
+  if (ev.type === 'start') { HF.reps = ev.reps; if (UI.rest) HF.early = true; else if (ev.reps >= showAt) { hfSound('start'); hfPhase('count'); } }
   else if (ev.type === 'rep') {
     HF.reps = ev.reps;
     // a set begun before the rest is over takes the screen once it is clearly a set (3 reps), not you loading plates
     if (HF.early) { if (ev.reps >= 3) { HF.early = false; A.restSkip(); hfSound('start'); hfPhase('count'); } }
-    else if (HF.phase === 'count') { hfRepSound(); hfRender(); } else if (!UI.rest) { hfSound('start'); hfPhase('count'); }
+    else if (HF.phase === 'count') { hfRepSound(); hfRender(); } else if (!UI.rest && ev.reps >= showAt) { hfSound('start'); hfPhase('count'); }
   } else if (ev.type === 'end') {
     const early = HF.early; HF.early = false;
-    // the camera never logs a single: one rep "set" means it lost track or was fooled; tap the reps chip for a true single
-    if (!early && HF.phase === 'count' && ev.reps >= 2) hfLog(ev.reps); else if (HF.phase === 'count') hfPhase('wait');
+    if (!early && HF.phase === 'count' && ev.reps >= logAt) hfLog(ev.reps); else { HF.reps = 0; if (HF.phase === 'count') hfPhase('wait'); }
   }
 }
 function hfPhase(p){ HF.phase = p; HF.shown = null; hfRender(); }
