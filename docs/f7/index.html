@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><!--train-app--><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="color-scheme" content="dark light"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="robots" content="noindex,nofollow"><script>window.LIFT_LS='liftf7.v1';window.LIFT_IMG='../img/';window.LIFT_SELF='https://j7331.github.io/train/f7/';window.LIFT_POSE='../pose/';</script><title>Lift</title> <style>/**
+<!doctype html><html lang="en"><head><!--train-app--><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="color-scheme" content="dark light"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="robots" content="noindex,nofollow"><script>window.LIFT_LS='liftf7.v1';window.LIFT_IMG='../img/';window.LIFT_SELF='https://j7331.github.io/train/f7/';window.LIFT_POSE='../pose/';window.LIFT_SND='../snd/';</script><title>Lift</title> <style>/**
  * Framework7 8.3.4
  * Full featured mobile HTML framework for building iOS & Android apps
  * https://framework7.io/
@@ -1425,7 +1425,7 @@ function seedRoutines(){
 /* ---------- storage: this device + your private Claude storage ---------- */
 const LS = window.LIFT_LS || 'liftbook.v1';
 /* ---------- iPhone app: extras that only switch on inside the Train app (Capacitor) ---------- */
-const BUILD0 = '1795804820807', BUILD = BUILD0.startsWith('__') ? 'dev' : BUILD0;
+const BUILD0 = '1795844232536', BUILD = BUILD0.startsWith('__') ? 'dev' : BUILD0;
 const NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 const NP = n => NATIVE ? ((window.Capacitor.Plugins || {})[n] || null) : null;
 const DATA_FILE = 'train-data.json'; // Files › On My iPhone › Train, read back by the app shell at launch
@@ -1435,7 +1435,7 @@ const REST_NOTE = 7;
 function restNotify(){ // the phone is locked or in another app: let iOS ring when rest ends
   const L = NP('LocalNotifications'), R = UI.rest; if (!L || !R || !S.settings.sound || R.end <= Date.now() + 1500) return;
   const n = S.active && nextSet(S.active), e = n ? S.active.ex[n[0]] : S.active && S.active.ex.find(x => x.sets.some(z => !z.done));
-  L.schedule({notifications:[{id:REST_NOTE, title:R.kind === 'sw' ? 'Switch' : 'Rest’s up', body:e ? getEx(e.eid).name.replace(/\s+\(.*\)$/, '') : (S.active ? S.active.name : 'Lift'), schedule:{at:new Date(R.end), allowWhileIdle:true}, sound:'rest.wav'}]}).catch(() => {});
+  L.schedule({notifications:[{id:REST_NOTE, title:R.kind === 'sw' ? 'Switch' : 'Rest’s up', body:e ? getEx(e.eid).name.replace(/\s+\(.*\)$/, '') : (S.active ? S.active.name : 'Lift'), schedule:{at:new Date(R.end), allowWhileIdle:true}, sound:restNoteSound()}]}).catch(() => {});
 }
 function restUnnotify(){ const L = NP('LocalNotifications'); if (L) L.cancel({notifications:[{id:REST_NOTE}]}).catch(() => {}); }
 let askedNote = false;
@@ -2291,9 +2291,9 @@ function tickRest(){
   if (mr) mr.textContent = '⏱ ' + clock(left) + ' · ';
 }
 let AC = null;
-function unlockAudio(){ try { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); } catch(e) {} }
+function unlockAudio(){ if (sndNat()) return; try { if (!AC) { AC = new (window.AudioContext || window.webkitAudioContext)(); sndLoad(); } if (AC.state === 'suspended') AC.resume(); } catch(e) {} }
 function beep(){
-  try { if (AC) [[1318.5, 0], [1760, 0.16]].forEach(([f, t]) => { const o = AC.createOscillator(), g = AC.createGain(), t0 = AC.currentTime + t; o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.28, t0 + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.9); o.connect(g).connect(AC.destination); o.start(t0); o.stop(t0 + 0.95); }); } catch(e) {}
+  snd('rest_' + restSnd());
   try { navigator.vibrate && navigator.vibrate([180, 90, 180]); } catch(e) {}
   haptic('done');
 }
@@ -2473,7 +2473,7 @@ function renderSettings(){
     ${segLi('Default rest', `<div class="restgrid" style="grid-template-columns:repeat(6,1fr)">${[60,90,120,150,180,240].map(x => `<button data-act="setDefRest" data-s="${x}" aria-pressed="${st.rest === x}">${restFmt(x)}</button>`).join('')}</div>`)}
     ${segLi('Week starts on', seg('setWeek', [['mon','Monday'],['sun','Sunday']], st.weekSun ? 'sun' : 'mon'))}
     ${li('Weekly goal', numIn('data-s="goal" inputmode="numeric"', st.goal, 50))}
-    ${tog('autoRest', 'Start rest when I log a set')}${hfCan() ? `<li class="item-content"><div class="item-inner"><div class="item-title">Hands-free voice</div><div class="item-after"><label class="toggle"><input type="checkbox" data-s="hfVoice" ${st.hfVoice !== false ? 'checked' : ''}><span class="toggle-icon"></span></label></div></div></li><li class="item-content"><div class="item-inner"><div class="item-title">Hands-free sounds</div><div class="item-after"><label class="toggle"><input type="checkbox" data-s="hfSound" ${st.hfSound !== false ? 'checked' : ''}><span class="toggle-icon"></span></label></div></div></li>` : ''}${tog('sound', 'Beep and vibrate when rest ends')}${tog('awake', 'Keep screen on')}${tog('rpe', 'Show RPE')}
+    ${tog('autoRest', 'Start rest when I log a set')}${hfCan() ? `<li class="item-content"><div class="item-inner"><div class="item-title">Hands-free voice</div><div class="item-after"><label class="toggle"><input type="checkbox" data-s="hfVoice" ${st.hfVoice !== false ? 'checked' : ''}><span class="toggle-icon"></span></label></div></div></li><li class="item-content"><div class="item-inner"><div class="item-title">Hands-free sounds</div><div class="item-after"><label class="toggle"><input type="checkbox" data-s="hfSound" ${st.hfSound !== false ? 'checked' : ''}><span class="toggle-icon"></span></label></div></div></li>` : ''}${tog('sound', 'Sound when rest ends')}${st.sound ? segLi('Rest sound', seg('setRestSnd', SND_REST, restSnd())) : ''}${tog('awake', 'Keep screen on')}${tog('rpe', 'Show RPE')}
   </ul></div>`;
   h += `<div class="block-title">Library</div><div class="list list-strong inset"><ul><li><a href="#" class="item-link item-content" data-act="openExList"><div class="item-inner"><div class="item-title">Exercises</div><div class="item-after">${allEx().length}</div></div></a></li></ul></div>`;
   h += `<div class="block-title">Your data</div>`;
@@ -3093,6 +3093,7 @@ document.addEventListener('change', ev => {
   else if (k === 'pmBase') { const v = parseNum(t.value); S.settings.pmach = {...S.settings.pmach, base:fromU(v || 0)}; }
   else if (k === 'goal') { const v = parseNum(t.value); if (v) S.settings.goal = Math.max(1, Math.min(14, Math.round(v))); }
   touch('settings');
+  if (k === 'sound') renderPage();
 });
 let focusAt = 0;
 document.addEventListener('focusin', ev => {
@@ -3436,12 +3437,10 @@ function hfDraw(lm){
   g.globalAlpha = 1;
 }
 // ---- what it hears: short tones so you can tell it is following along without looking ----
-const HF_SND = {ready: [[1047, 0, 0.12]], start: [[660, 0, 0.1], [880, 0.1, 0.16]], rep: [[880, 0, 0.07, 0.2]], target: [[1319, 0, 0.18, 0.3]], beat: [[1319, 0, 0.1], [1760, 0.1, 0.2]], logged: [[784, 0, 0.12], [1047, 0.12, 0.22]], lost: [[330, 0, 0.24, 0.2]]};
 function hfSound(name){
   if (window.LIFT_HF_SND) window.LIFT_HF_SND(name);
-  if (S.settings.hfSound === false || !AC) return;
-  try { if (AC.state === 'suspended') AC.resume();
-    HF_SND[name].forEach(([f, t, d, vol]) => { const o = AC.createOscillator(), gn = AC.createGain(), t0 = AC.currentTime + t; o.type = 'sine'; o.frequency.value = f; gn.gain.setValueAtTime(0.0001, t0); gn.gain.exponentialRampToValueAtTime(vol || 0.26, t0 + 0.012); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + d); o.connect(gn).connect(AC.destination); o.start(t0); o.stop(t0 + d + 0.04); }); } catch (e) {}
+  if (S.settings.hfSound === false) return;
+  snd('hf_' + name);
 }
 // one sound per rep: a plain tick, a higher note when you reach the target, a two-note rise when you pass last time
 function hfRepSound(){ const nx = hfNext(); if (!nx) return; hfSound(nx.beat != null && HF.reps === nx.beat + 1 ? 'beat' : nx.target && HF.reps === nx.target ? 'target' : 'rep'); }
@@ -3577,6 +3576,7 @@ function hfRestDone(){ if (!HF.on) return;
   if (HF.early) { HF.early = false; hfSound('start'); hfPhase('count'); return; }   // you had already started the next set: show its count, say nothing
   if (HF.phase !== 'count') hfPhase('wait'); const nx = hfNext(); if (nx) hfSay(`${nx.name}. ${nx.label.replace(/ of \d+$/, '')}${nx.wtxt ? '. ' + nx.wtxt.replace('+', 'plus ') + ' pounds' : nx.k === 'w' || nx.k === 'wbw' ? '. Set the weight' : ''}`); }
 function hfSay(text, unlock){
+  const T = sndNat(); if (T) { if (!unlock && S.settings.hfVoice !== false && text.trim()) T.say({text}).catch(() => {}); return; }   // the iPhone's own voice, with music dipped under it
   if (!('speechSynthesis' in window) || (!unlock && S.settings.hfVoice === false)) return;
   try { const u = new SpeechSynthesisUtterance(text); u.rate = 1.05; u.volume = unlock ? 0 : 1; if (!unlock) speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {}
 }
@@ -3591,6 +3591,48 @@ Object.assign(A, {
 });
 // coming back to the app: iOS stops the camera in the background, so start it again
 document.addEventListener('visibilitychange', () => { if (!document.hidden && HF.on && HF.stream && HF.stream.getTracks().some(t => t.readyState === 'ended')) { hfDrop(); hfCam().catch(() => { hfStop(); toast('Camera couldn’t start'); }); } });
+
+/* ---------- sounds: one family of bright mallet cues, mastered loud. In the iPhone app they play natively, so music dips under them ---------- */
+const SNDS = ['rest_chime', 'rest_bell', 'rest_pulse', 'hf_ready', 'hf_start', 'hf_rep', 'hf_target', 'hf_beat', 'hf_logged', 'hf_lost'];
+const SND_REST = [['chime', 'Chime'], ['bell', 'Bell'], ['pulse', 'Beeps']];
+// cues that matter get the music turned down for a moment; rep ticks just play over it
+const SND_DUCK = n => /^rest_/.test(n) || n === 'hf_start' || n === 'hf_logged' || n === 'hf_lost';
+const sndNat = () => NATIVE && (window.LIFT_NATIVE_V || 0) >= 3 ? NP('TrainNative') : null;
+const sndBase = () => window.LIFT_SND || (sndNat() ? 'snd/' : window.TRAIN_REMOTE ? window.TRAIN_REMOTE + 'snd/' : location.href.replace(/[?#].*$/, '').replace(/[^/]*$/, '') + 'snd/');
+const restSnd = () => SND_REST.some(([k]) => k === S.settings.restSnd) ? S.settings.restSnd : 'chime';
+const SNDBUF = {};
+function sndLoad(){
+  if (sndNat() || !AC) return;
+  SNDS.forEach(n => { if (!SNDBUF[n]) SNDBUF[n] = fetch(sndBase() + n + '.wav').then(r => { if (!r.ok) throw 0; return r.arrayBuffer(); }).then(b => new Promise((ok, no) => AC.decodeAudioData(b, ok, no))).catch(() => { delete SNDBUF[n]; return null; }); });
+}
+function snd(name){
+  if (window.LIFT_SND_LOG) window.LIFT_SND_LOG(name);
+  const T = sndNat(); if (T) { T.play({name, duck: SND_DUCK(name)}).catch(() => {}); return; }
+  if (!AC) return;
+  try { if (AC.state === 'suspended') AC.resume(); } catch(e) {}
+  if (!SNDBUF[name]) sndLoad();
+  const p = SNDBUF[name]; if (!p) return;
+  p.then(buf => { if (!buf) return; try { const s = AC.createBufferSource(); s.buffer = buf; s.connect(AC.destination); s.start(); } catch(e) {} });
+}
+// the lock-screen alert uses the same sound: iOS plays a notification's sound from the app's Library/Sounds folder
+let sndInst = '';
+async function sndInstall(){
+  const F = NP('Filesystem'), c = restSnd(); if (!NATIVE || !F || sndInst === c) return;
+  try {
+    const key = 'lift.notesnd', done = localStorage.getItem(key);
+    if (done === c + BUILD) { sndInst = c; return; }
+    const r = await fetch(sndBase() + 'rest_' + c + '.wav'); if (!r.ok) return;
+    const u = new Uint8Array(await r.arrayBuffer()); let bin = ''; for (let i = 0; i < u.length; i += 0x8000) bin += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+    await F.writeFile({path: 'Sounds/rest-' + c + '.wav', data: btoa(bin), directory: 'LIBRARY', recursive: true});
+    sndInst = c; localStorage.setItem(key, c + BUILD);
+  } catch(e) {}
+}
+const restNoteSound = () => sndInst === restSnd() ? 'rest-' + sndInst + '.wav' : 'rest.wav';
+Object.assign(A, {
+  setRestSnd: t => { S.settings.restSnd = t.dataset.k; touch('settings'); renderPage(); unlockAudio(); snd('rest_' + restSnd()); sndInstall(); },
+});
+HAP.setRestSnd = 'select';
+setTimeout(sndInstall, 6000);
 
 /* ---------- leave off where you were: the screen you had open survives the app being dropped, reloaded or updated ---------- */
 const UIK = LS + '.ui';
